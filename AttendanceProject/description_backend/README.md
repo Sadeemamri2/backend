@@ -103,3 +103,11 @@ This backend serves as the core API service for the React.js frontend client.
 
 ## ERD Diagram
 ![ERD Diagram](/AttendanceProject/description_backend/ERD.png)
+
+---
+
+## ⚙️ Installation Instructions (Docker)
+
+---
+
+## ❄️ IceBox Features
