@@ -24,7 +24,7 @@ This backend serves as the core API service for the React.js frontend client.
 ---
 
 ## Frontend Repo Link
-[Hudoorr Frontend Repo]()
+[Hudoorr Frontend Repo](https://github.com/Sadeemamri2/frontend)
 
 ---
 
@@ -111,3 +111,8 @@ This backend serves as the core API service for the React.js frontend client.
 ---
 
 ## ❄️ IceBox Features
+- Add **Guardian Portal** to notify parents about attendance.
+- Admin Dashboard with advanced filters and statistics.
+- SMS / Email notifications for absentees.
+- Export attendance reports to PDF/Excel.
+- Dark Mode and Theme Customization.
