@@ -1,7 +1,28 @@
-from rest_framework import viewsets
-from .models import CustomUser
-from .serializers import CustomUserSerializer
+# views.py
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from .models import CustomUser, Role, Classroom
+from .serializers import CustomUserSerializer, RoleSerializer, ClassroomSerializer
 
-class CustomUserViewSet(viewsets.ModelViewSet):
-    queryset = CustomUser.objects.select_related('role').all()
+class CustomUserListCreateView(ListCreateAPIView):
+    queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
+
+class CustomUserDetailView(RetrieveUpdateDestroyAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = CustomUserSerializer
+
+class RoleListCreateView(ListCreateAPIView):
+    queryset = Role.objects.all()
+    serializer_class = RoleSerializer
+
+class RoleDetailView(RetrieveUpdateDestroyAPIView):
+    queryset = Role.objects.all()
+    serializer_class = RoleSerializer
+
+class ClassroomListCreateView(ListCreateAPIView):
+    queryset = Classroom.objects.all()
+    serializer_class = ClassroomSerializer
+
+class ClassroomDetailView(RetrieveUpdateDestroyAPIView):
+    queryset = Classroom.objects.all()
+    serializer_class = ClassroomSerializer

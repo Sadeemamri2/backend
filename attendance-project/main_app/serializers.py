@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CustomUser, Role
+from .models import CustomUser, Role, Classroom
 
 class RoleSerializer(serializers.ModelSerializer):
     class Meta:
@@ -27,3 +27,8 @@ class CustomUserSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+
+class ClassroomSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Classroom
+        fields = '__all__'
