@@ -5,6 +5,7 @@ from .views import (
     RoleListCreateView, RoleDetailView,
     ClassRoomListCreateView, ClassRoomDetailView,
     AttendanceProcessListCreateView, AttendanceProcessDetailView,
+    ReportListCreateView, ReportDetailView
 )
 
 urlpatterns = [
@@ -19,4 +20,7 @@ urlpatterns = [
 
     path('attendance/',            AttendanceProcessListCreateView.as_view(),    name='attendance-list'),
     path('attendance/<int:pk>/',   AttendanceProcessDetailView.as_view(),        name='attendance-detail'),
+
+    path('reports/', ReportListCreateView.as_view(), name='report-list'),
+    path('reports/<int:pk>/', ReportDetailView.as_view(), name='report-detail'),
 ]

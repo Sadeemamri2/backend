@@ -10,24 +10,19 @@ class Role(models.Model):
     def __str__(self):
         return f"{self.name} ({self.role_type})"
 # ---------- Custom User Model ----------
+
 class CustomUser(AbstractUser):
-    name = models.CharField(max_length=150)
-    email = models.EmailField(unique=True)
-    password = models.CharField(max_length=128)
-    role = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True)
+    name = models.CharField(max_length=150, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)  # يمكن نخليه optional
+    role = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True, blank=True)
 
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']
-
-   
     def __str__(self):
-        return self.name or self.email or self.username
-
+        return self.username
 
 # ---------- ClassRoom Model ----------
 class ClassRoom(models.Model):
     name = models.CharField(max_length=100)
-    year = models.CharField(max_length=10, null=False)
+    year = models.CharField(max_length=10)  # تأكد من إضافة هذا السطر
     role = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
@@ -50,3 +45,15 @@ class AttendanceProcess(models.Model):
 
     def __str__(self):
         return f"Attendance on {self.date} - {self.status}"
+
+# ---------- Report Model ----------
+class Report(models.Model):
+    title = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    content = models.TextField(blank=True, null=True)
+
+    role = models.ForeignKey(Role, on_delete=models.CASCADE)
+    attendance = models.ForeignKey(AttendanceProcess, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.title} - {self.created_at.strftime('%Y-%m-%d')}"

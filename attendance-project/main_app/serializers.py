@@ -1,6 +1,6 @@
 # main_app/serializers.py
 from rest_framework import serializers
-from .models import CustomUser, Role, ClassRoom, AttendanceProcess
+from .models import CustomUser, Role, ClassRoom, AttendanceProcess , Report
 
 class RoleSerializer(serializers.ModelSerializer):
     class Meta:
@@ -56,4 +56,27 @@ class AttendanceProcessSerializer(serializers.ModelSerializer):
             'note',
             'role', 'role_id',
             'classroom', 'classroom_id',
+        ]
+
+class ReportSerializer(serializers.ModelSerializer):
+    role = RoleSerializer(read_only=True)
+    role_id = serializers.PrimaryKeyRelatedField(
+        queryset=Role.objects.all(),
+        source='role',
+        write_only=True
+    )
+
+    attendance = AttendanceProcessSerializer(read_only=True)
+    attendance_id = serializers.PrimaryKeyRelatedField(
+        queryset=AttendanceProcess.objects.all(),
+        source='attendance',
+        write_only=True
+    )
+
+    class Meta:
+        model = Report
+        fields = [
+            'id', 'title', 'created_at', 'content',
+            'role', 'role_id',
+            'attendance', 'attendance_id'
         ]

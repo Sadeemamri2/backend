@@ -4,12 +4,12 @@ from rest_framework.generics import (
     ListCreateAPIView,
     RetrieveUpdateDestroyAPIView
 )
-from .models import CustomUser, Role, ClassRoom, AttendanceProcess
+from .models import CustomUser, Role, ClassRoom, AttendanceProcess, Report
 from .serializers import (
     CustomUserSerializer,
     RoleSerializer,
     ClassRoomSerializer,
-    AttendanceProcessSerializer
+    AttendanceProcessSerializer, ReportSerializer
 )
 
 class CustomUserListCreateView(ListCreateAPIView):
@@ -55,4 +55,19 @@ class AttendanceProcessDetailView(RetrieveUpdateDestroyAPIView):
     serializer_class = AttendanceProcessSerializer
 
     # مثال: تقييد التعديل/الحذف للمسؤول فقط:
+    permission_classes = [permissions.IsAdminUser]
+
+
+class ReportListCreateView(ListCreateAPIView):
+    queryset = Report.objects.all()
+    serializer_class = ReportSerializer
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [permissions.IsAdminUser()]
+        return [permissions.AllowAny()]
+
+class ReportDetailView(RetrieveUpdateDestroyAPIView):
+    queryset = Report.objects.all()
+    serializer_class = ReportSerializer
     permission_classes = [permissions.IsAdminUser]
