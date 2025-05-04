@@ -4,29 +4,37 @@ from django.contrib.auth.models import AbstractUser
 
 # ---------- Role Model ----------
 class Role(models.Model):
-    name = models.CharField(max_length=50)
-    role_type = models.CharField(max_length=50)
-
+    name = models.CharField(max_length=50)  # مثل: طالب، معلم، مدير
     def __str__(self):
-        return f"{self.name} ({self.role_type})"
+        return self.name
+
 # ---------- Custom User Model ----------
 
 class CustomUser(AbstractUser):
-    name = models.CharField(max_length=150, blank=True, null=True)
-    email = models.EmailField(blank=True, null=True)  # يمكن نخليه optional
-    role = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True, blank=True)
+    role = models.CharField(max_length=50)
+    email = models.EmailField(blank=True, null=True)
 
-    def __str__(self):
-        return self.username
+class StudentProfile(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    student_id = models.CharField(max_length=20)
+    classroom = models.ForeignKey('ClassRoom', on_delete=models.SET_NULL, null=True, blank=True)
+
+class TeacherProfile(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    subjects = models.CharField(max_length=255)
+
+class AttendanceOfficerProfile(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    region = models.CharField(max_length=100)
 
 # ---------- ClassRoom Model ----------
 class ClassRoom(models.Model):
     name = models.CharField(max_length=100)
-    year = models.CharField(max_length=10)  # تأكد من إضافة هذا السطر
-    role = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True)
-
+    year = models.CharField(max_length=10)
+    
     def __str__(self):
         return f"{self.name} ({self.year})"
+
 
 
 # ---------- Attendance Process Model ----------
@@ -36,23 +44,22 @@ class AttendanceProcess(models.Model):
         ('Absent', 'Absent'),
         ('Excused', 'Excused'),
     ]
-
     date = models.DateField()
     status = models.CharField(max_length=10, choices=STATUS_CHOICES)
     note = models.TextField(blank=True, null=True)
-    role = models.ForeignKey(Role, on_delete=models.CASCADE)
+    student = models.ForeignKey(CustomUser, on_delete=models.CASCADE, limit_choices_to={'role__name': 'Student'})
     classroom = models.ForeignKey(ClassRoom, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"Attendance on {self.date} - {self.status}"
+        return f"{self.student.username} - {self.date} - {self.status}"
+
 
 # ---------- Report Model ----------
 class Report(models.Model):
     title = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     content = models.TextField(blank=True, null=True)
-
-    role = models.ForeignKey(Role, on_delete=models.CASCADE)
+    created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     attendance = models.ForeignKey(AttendanceProcess, on_delete=models.CASCADE)
 
     def __str__(self):

@@ -1,33 +1,61 @@
-# main_app/views.py
-from rest_framework import permissions
-from rest_framework.generics import (
-    ListCreateAPIView,
-    RetrieveUpdateDestroyAPIView
+from rest_framework import permissions, status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+
+from .models import (
+    CustomUser, Role, ClassRoom,
+    AttendanceProcess, Report,
+    StudentProfile, TeacherProfile, AttendanceOfficerProfile
 )
-from .models import CustomUser, Role, ClassRoom, AttendanceProcess, Report
 from .serializers import (
-    CustomUserSerializer,
-    RoleSerializer,
-    ClassRoomSerializer,
+    CustomUserSerializer, ClassRoomSerializer,
     AttendanceProcessSerializer, ReportSerializer
 )
 
+# لو ما عندك CurrentUserSerializer، استخدم CustomUserSerializer بداله
+from .serializers import CustomUserSerializer as CurrentUserSerializer
+
+
+# ---------- Users ----------
 class CustomUserListCreateView(ListCreateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            print("❌ Signup Errors:", serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class CustomUserDetailView(RetrieveUpdateDestroyAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
 
-class RoleListCreateView(ListCreateAPIView):
-    queryset = Role.objects.all()
-    serializer_class = RoleSerializer
 
-class RoleDetailView(RetrieveUpdateDestroyAPIView):
-    queryset = Role.objects.all()
-    serializer_class = RoleSerializer
+# ---------- Roles ----------
+# class RoleListCreateView(ListCreateAPIView):
+#     queryset = Role.objects.all()
+#     serializer_class = RoleSerializer
 
+# class RoleDetailView(RetrieveUpdateDestroyAPIView):
+#     queryset = Role.objects.all()
+#     serializer_class = RoleSerializer
+
+
+# ---------- Current User ----------
+class CurrentUserView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        serializer = CurrentUserSerializer(request.user)
+        return Response(serializer.data)
+
+
+# ---------- Classrooms ----------
 class ClassRoomListCreateView(ListCreateAPIView):
     queryset = ClassRoom.objects.all()
     serializer_class = ClassRoomSerializer
@@ -36,15 +64,12 @@ class ClassRoomDetailView(RetrieveUpdateDestroyAPIView):
     queryset = ClassRoom.objects.all()
     serializer_class = ClassRoomSerializer
 
+
+# ---------- Attendance ----------
 class AttendanceProcessListCreateView(ListCreateAPIView):
-    """
-    GET: قائمة كل السجلات
-    POST: إضافة سجل جديد
-    """
     queryset = AttendanceProcess.objects.all()
     serializer_class = AttendanceProcessSerializer
 
-    # مثال: تقييد إضافة الغياب للمسؤول فقط:
     def get_permissions(self):
         if self.request.method == 'POST':
             return [permissions.IsAdminUser()]
@@ -53,11 +78,10 @@ class AttendanceProcessListCreateView(ListCreateAPIView):
 class AttendanceProcessDetailView(RetrieveUpdateDestroyAPIView):
     queryset = AttendanceProcess.objects.all()
     serializer_class = AttendanceProcessSerializer
-
-    # مثال: تقييد التعديل/الحذف للمسؤول فقط:
     permission_classes = [permissions.IsAdminUser]
 
 
+# ---------- Reports ----------
 class ReportListCreateView(ListCreateAPIView):
     queryset = Report.objects.all()
     serializer_class = ReportSerializer
