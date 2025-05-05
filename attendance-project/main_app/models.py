@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractUser
 
 
 # ---------- Role Model ----------
+# IGNORE THIS, THIS IS NOT BEING USED ANYMORE!!!!
 class Role(models.Model):
     name = models.CharField(max_length=50)  # مثل: طالب، معلم، مدير
     def __str__(self):
@@ -11,12 +12,19 @@ class Role(models.Model):
 # ---------- Custom User Model ----------
 
 class CustomUser(AbstractUser):
-    role = models.CharField(max_length=50)
+    ROLE_CHOICES = [
+        ('admin', 'admin'),
+        ('teacher', 'teacher'),
+        ('student', 'student'),
+    ]
+    role = models.CharField(max_length=50, choices=ROLE_CHOICES)
     email = models.EmailField(blank=True, null=True)
+    classroom = models.ForeignKey('ClassRoom', on_delete=models.SET_NULL, null=True, blank=True, related_name='students')
+
+
 
 class StudentProfile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-    student_id = models.CharField(max_length=20)
     classroom = models.ForeignKey('ClassRoom', on_delete=models.SET_NULL, null=True, blank=True)
 
 class TeacherProfile(models.Model):
@@ -31,7 +39,9 @@ class AttendanceOfficerProfile(models.Model):
 class ClassRoom(models.Model):
     name = models.CharField(max_length=100)
     year = models.CharField(max_length=10)
-    
+    teacher = models.OneToOneField(CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='teaching_classroom')
+
+
     def __str__(self):
         return f"{self.name} ({self.year})"
 
@@ -47,7 +57,7 @@ class AttendanceProcess(models.Model):
     date = models.DateField()
     status = models.CharField(max_length=10, choices=STATUS_CHOICES)
     note = models.TextField(blank=True, null=True)
-    student = models.ForeignKey(CustomUser, on_delete=models.CASCADE, limit_choices_to={'role__name': 'Student'})
+    student = models.ForeignKey(CustomUser, on_delete=models.CASCADE, limit_choices_to={'role': 'Student'})
     classroom = models.ForeignKey(ClassRoom, on_delete=models.CASCADE)
 
     def __str__(self):

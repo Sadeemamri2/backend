@@ -14,7 +14,7 @@ from .serializers import (
     AttendanceProcessSerializer, ReportSerializer
 )
 
-# لو ما عندك CurrentUserSerializer، استخدم CustomUserSerializer بداله
+
 from .serializers import CustomUserSerializer as CurrentUserSerializer
 
 
@@ -56,7 +56,43 @@ class CurrentUserView(APIView):
 
 
 # ---------- Classrooms ----------
+
+class GetClassrooms(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            classrooms = ClassRoom.objects.all()
+        except Exception as e:
+            print("❌ Error fetching classrooms:", str(e))
+            return Response({"error": "An error occurred while fetching classrooms."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        serializer = ClassRoomSerializer(classrooms, many=True)
+        return Response(serializer.data)
+
+class StudentsByClassroomView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, classroom_id):
+        students = CustomUser.objects.filter(role='student', classroom__id=classroom_id)
+        serializer = CustomUserSerializer(students, many=True)
+        return Response(serializer.data)
+
+# class StudentListView(APIView):
+#     permission_classes = [IsAuthenticated]
+
+#     def get(self, request):
+#         students = CustomUser.objects.filter(role__name='Student')
+#         serializer = CustomUserSerializer(students, many=True)
+#         return Response(serializer.data)
+
+# class StudentDetailView(RetrieveUpdateDestroyAPIView):
+#     queryset = CustomUser.objects.filter(role__name='Student')
+#     serializer_class = CustomUserSerializer
+#     permission_classes = [IsAuthenticated]
+
 class ClassRoomListCreateView(ListCreateAPIView):
+    print("ClassRoomListCreateView")
     queryset = ClassRoom.objects.all()
     serializer_class = ClassRoomSerializer
 

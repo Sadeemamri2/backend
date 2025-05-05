@@ -43,9 +43,15 @@ class CurrentUserSerializer(serializers.ModelSerializer):
 
 # ---------- ClassRoom Serializer ----------
 class ClassRoomSerializer(serializers.ModelSerializer):
+    students = serializers.SerializerMethodField()
+
     class Meta:
         model = ClassRoom
-        fields = ['id', 'name', 'year']
+        fields = ['id', 'name', 'year', 'teacher', 'students']  # assuming 'teacher' is added to the model
+
+    def get_students(self, obj):
+        students = CustomUser.objects.filter(classroom=obj, role='Student')
+        return CustomUserSerializer(students, many=True).data
 
 
 # ---------- AttendanceProcess Serializer ----------

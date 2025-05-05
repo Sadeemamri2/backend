@@ -1,12 +1,7 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-from .views import (
-    CustomUserListCreateView, CustomUserDetailView, CurrentUserView,
-    ClassRoomListCreateView, ClassRoomDetailView,
-    AttendanceProcessListCreateView, AttendanceProcessDetailView,
-    ReportListCreateView, ReportDetailView
-)
+from .views import *
 
 urlpatterns = [
     # Authentication
@@ -23,7 +18,7 @@ urlpatterns = [
     # path('roles/<int:pk>/', RoleDetailView.as_view(),           name='role-detail'),
 
     # Classrooms
-    path('classrooms/',          ClassRoomListCreateView.as_view(),  name='classroom-list'),
+    path('classrooms/',          GetClassrooms.as_view(),  name='classroom-list'),
     path('classrooms/<int:pk>/', ClassRoomDetailView.as_view(),      name='classroom-detail'),
 
     # Attendance
@@ -33,4 +28,10 @@ urlpatterns = [
     # Reports
     path('reports/',          ReportListCreateView.as_view(),     name='report-list'),
     path('reports/<int:pk>/', ReportDetailView.as_view(),         name='report-detail'),
+
+    # Student List
+    # path('students/', StudentListView.as_view(), name='student-list'),
+    # path('students/<int:pk>/', StudentDetailView.as_view(), name='student-detail'),
+    # Get students by classroom
+    path('classrooms/<int:classroom_id>/students/', StudentsByClassroomView.as_view(), name='students-by-classroom'),
 ]
