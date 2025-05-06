@@ -22,7 +22,9 @@ urlpatterns = [
     path('classrooms/<int:pk>/', ClassRoomDetailView.as_view(),      name='classroom-detail'),
 
     # Attendance
-    path('attendance/',          AttendanceProcessListCreateView.as_view(),  name='attendance-list'),
+    path('attendance/', BulkAttendanceView.as_view(), name='bulk_attendance'),
+
+    # path('attendance/',          AttendanceProcessListCreateView.as_view(),  name='attendance-list'),
     path('attendance/<int:pk>/', AttendanceProcessDetailView.as_view(),      name='attendance-detail'),
 
     # Reports
@@ -34,4 +36,5 @@ urlpatterns = [
     # path('students/<int:pk>/', StudentDetailView.as_view(), name='student-detail'),
     # Get students by classroom
     path('classrooms/<int:classroom_id>/students/', StudentsByClassroomView.as_view(), name='students-by-classroom'),
+    path('students/', StudentListView.as_view(), name='student-list'),
 ]

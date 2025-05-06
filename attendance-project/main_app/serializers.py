@@ -11,26 +11,6 @@ from .models import CustomUser, Role, ClassRoom, AttendanceProcess, Report
 
 
 # ---------- CustomUser Serializer ----------
-class CustomUserSerializer(serializers.ModelSerializer):
-    # role = RoleSerializer(read_only=True)
-    # role_id = serializers.PrimaryKeyRelatedField(
-    #     queryset=Role.objects.all(),
-    #     source='role',
-    #     write_only=True
-    # )
-
-    class Meta:
-        model = CustomUser
-        # fields = ['id', 'username', 'email', 'password', 'role', 'role_id']
-        fields = ['id', 'username', 'email', 'password', 'role']
-        extra_kwargs = {'password': {'write_only': True}}
-
-    def create(self, validated_data):
-        pwd = validated_data.pop('password')
-        user = CustomUser(**validated_data)
-        user.set_password(pwd)
-        user.save()
-        return user
 
 
 # ---------- Current User Serializer ----------
@@ -52,6 +32,24 @@ class ClassRoomSerializer(serializers.ModelSerializer):
     def get_students(self, obj):
         students = CustomUser.objects.filter(classroom=obj, role='Student')
         return CustomUserSerializer(students, many=True).data
+
+
+class CustomUserSerializer(serializers.ModelSerializer):
+
+    classroom = ClassRoomSerializer(read_only=True)
+
+    class Meta:
+        model = CustomUser
+        fields = ['id', 'username', 'email', 'password', 'role', 'classroom']
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def create(self, validated_data):
+        pwd = validated_data.pop('password')
+        user = CustomUser(**validated_data)
+        user.set_password(pwd)
+        user.save()
+        return user
+
 
 
 # ---------- AttendanceProcess Serializer ----------

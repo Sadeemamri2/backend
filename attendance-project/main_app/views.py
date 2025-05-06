@@ -3,11 +3,16 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import CustomUser, ClassRoom, AttendanceProcess, Report  # assuming these models are in your models.py
+
 
 from .models import (
-    CustomUser, Role, ClassRoom,
-    AttendanceProcess, Report,
-    StudentProfile, TeacherProfile, AttendanceOfficerProfile
+    CustomUser,ClassRoom,
+    AttendanceProcess, Report, # Role,
+    # StudentProfile, TeacherProfile, AttendanceOfficerProfile
 )
 from .serializers import (
     CustomUserSerializer, ClassRoomSerializer,
@@ -75,19 +80,29 @@ class StudentsByClassroomView(APIView):
 
     def get(self, request, classroom_id):
         students = CustomUser.objects.filter(role='student', classroom__id=classroom_id)
+        print(students)
         serializer = CustomUserSerializer(students, many=True)
         return Response(serializer.data)
+
+class StudentListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        students = CustomUser.objects.filter(role='student')
+        serializer = CustomUserSerializer(students, many=True)
+        return Response(serializer.data)
+
 
 # class StudentListView(APIView):
 #     permission_classes = [IsAuthenticated]
 
 #     def get(self, request):
-#         students = CustomUser.objects.filter(role__name='Student')
+#         students = CustomUser.objects.filter(role='Student')
 #         serializer = CustomUserSerializer(students, many=True)
 #         return Response(serializer.data)
 
 # class StudentDetailView(RetrieveUpdateDestroyAPIView):
-#     queryset = CustomUser.objects.filter(role__name='Student')
+#     queryset = CustomUser.objects.filter(role='Student')
 #     serializer_class = CustomUserSerializer
 #     permission_classes = [IsAuthenticated]
 
@@ -106,16 +121,91 @@ class AttendanceProcessListCreateView(ListCreateAPIView):
     queryset = AttendanceProcess.objects.all()
     serializer_class = AttendanceProcessSerializer
 
-    def get_permissions(self):
-        if self.request.method == 'POST':
-            return [permissions.IsAdminUser()]
-        return [permissions.AllowAny()]
+    def post(self, request, *args, **kwargs):
+        print(request.data)
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            print("❌ Attendance Errors:", serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Save the attendance process
+        self.perform_create(serializer)
+        attendance_process = serializer.instance
+
+        # Create a new attendance report
+        try:
+            report = Report.objects.create(
+                attendance_process=attendance_process,
+                created_by=request.user
+            )
+            print("✅ Attendance Report Created:", report.id)
+        except Exception as e:
+            print("❌ Error creating attendance report:", str(e))
+            return Response({"error": "An error occurred while creating the attendance report."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
 
 class AttendanceProcessDetailView(RetrieveUpdateDestroyAPIView):
     queryset = AttendanceProcess.objects.all()
     serializer_class = AttendanceProcessSerializer
     permission_classes = [permissions.IsAdminUser]
 
+
+class BulkAttendanceView(APIView):
+    def post(self, request):
+        print("request.data", request.data)
+        data = request.data
+        classroom_id = data.get('classroom_id')
+        date = data.get('date')
+        attendances = data.get('attendances', [])
+
+        # Validate input
+        if not classroom_id or not date or not attendances:
+            return Response({'error': 'Missing required fields.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        attendance_instances = []
+        for entry in attendances:
+            student_id = entry.get('student_id')
+            status_value = entry.get('status')
+            note = entry.get('note', '')
+
+            try:
+                student = CustomUser.objects.get(id=student_id)
+                classroom = ClassRoom.objects.get(id=classroom_id)
+            except CustomUser.DoesNotExist:
+                continue  # Skip if student does not exist
+            except ClassRoom.DoesNotExist:
+                continue  # Skip if classroom does not exist
+
+            # Create the AttendanceProcess instance
+            attendance_instance = AttendanceProcess(
+                student=student,
+                classroom=classroom,
+                date=date,
+                status=status_value,
+                note=note
+            )
+            attendance_instances.append(attendance_instance)
+
+        # Bulk create attendance instances
+        AttendanceProcess.objects.bulk_create(attendance_instances)
+
+        # Create the Report object after creating AttendanceProcess instances
+        attendance = AttendanceProcess.objects.filter(
+            classroom_id=classroom_id, date=date
+        ).first()  # Ensure we have a valid attendance instance
+
+        if attendance:  # Only create a report if attendance exists
+            report = Report.objects.create(
+                title=f"Attendance Report for {date}",
+                content=f"Attendance recorded for classroom {classroom.name} on {date}.",
+                created_by=request.user,
+                attendance=attendance  # Link the report to the attendance instance
+            )
+
+        return Response({'message': 'Attendance recorded successfully.'}, status=status.HTTP_201_CREATED)
 
 # ---------- Reports ----------
 class ReportListCreateView(ListCreateAPIView):
