@@ -1,112 +1,32 @@
-# 🛠️ Hudoor - Backend
-## 📦 Project Description
+# 🛠️ Hudoor - Attendance Management System
 
-Hudoorr is a full-stack attendance tracking system designed for schools and educational institutions. The backend, built with Django and Django REST Framework, handles authentication, attendance logic, and database interactions. It supports three main user roles:
+## 📌 Project Description
 
-- **Student**: Can view their own attendance records.
-- **Teacher**: Can review attendance reports.
-- **Attendance Officer**: Can manage and record daily attendance, trigger absence notifications, and export data.
+**Hudoor** is a full-stack web application designed to streamline attendance tracking for schools and educational institutions. The system supports three main user roles:
 
-This backend serves as the core API service for the React.js frontend client.
+- 🧑‍🎓 **Students**: View their attendance records and receive notifications.
+- 🧑‍🏫 **Teachers**: Access attendance reports for their assigned classes.
+- 🛂 **Attendance Officers**: Record daily attendance, send absence notifications, and generate reports.
+
+Built with Django REST Framework on the backend and React.js on the frontend, the system uses JWT authentication for secure access. The project is Dockerized for easy deployment and scalability.
 
 ---
 
 ## 🧰 Tech Stack
 
-## Tech Stack
-- **Django** - Web framework for building the backend.
-- **Django REST Framework (DRF)** - API framework to build RESTful APIs.
-- **PostgreSQL** - Database to store the user and attendance data.
-- **JWT Authentication** - Secure user authentication using JSON Web Tokens.
-- **Django CORS Headers** - To enable Cross-Origin Resource Sharing (CORS).
-- **Djoser** - For handling JWT authentication with Django.
+### 🔙 Backend
+- **Django** – Web framework for building the backend.
+- **Django REST Framework (DRF)** – For creating RESTful APIs.
+- **PostgreSQL** – Database to store users and attendance data.
+- **JWT Authentication** – Secure token-based authentication.
+- **Djoser** – Authentication system for user registration and login.
+- **Django CORS Headers** – Enable CORS for frontend-backend communication.
 
----
-
-## Frontend Repo Link
-[Hudoorr Frontend Repo](https://github.com/Sadeemamri2/frontend)
-
----
-
-## Link to Deployed Site
-[Link to Deployed Backend]()
-
----
-
-## 👥 User Roles and Permissions
-
-| Role                | Permissions |
-|---------------------|-------------|
-| Attendance Officer   | Full CRUD access to classrooms, users, attendance, and reports. |
-| Teacher              | Read-only access to their assigned classrooms and students’ attendance. |
-| Student              | Read-only access to their personal attendance summary and notifications. |
-
----
-
-## 🛣️ Routing Table
-
-### 1. User Routes
-| Route                   | Method | Description                   | Role Required      |
-|--------------------------|--------|-------------------------------|--------------------|
-| `/api/users`             | GET    | Get all users                 | Officer            |
-| `/api/users/:id`         | GET    | Get user by ID                | Officer, Teacher   |
-| `/api/users`             | POST   | Create new user               | Officer            |
-| `/api/users/:id`         | PUT    | Update user                   | Officer, Self-update |
-| `/api/users/:id`         | DELETE | Delete user                   | Officer            |
-
----
-
-### 2. RoleModel Routes
-| Route                   | Method | Description                   | Role Required      |
-|--------------------------|--------|-------------------------------|--------------------|
-| `/api/roles`             | GET    | Get all roles                 | Officer            |
-| `/api/roles/:id`         | GET    | Get role by ID                | Officer            |
-| `/api/roles`             | POST   | Create new role               | Officer            |
-| `/api/roles/:id`         | PUT    | Update role                   | Officer            |
-| `/api/roles/:id`         | DELETE | Delete role                   | Officer            |
-
-> **Note:** There are only 3 role types: Officer, Teacher, Student.
-
----
-
-### 3. ClassRoom Routes
-| Route                   | Method | Description                   | Role Required      |
-|--------------------------|--------|-------------------------------|--------------------|
-| `/api/classrooms`        | GET    | Get all classrooms            | Officer, Teacher   |
-| `/api/classrooms/:id`    | GET    | Get classroom by ID           | Officer, Teacher   |
-| `/api/classrooms`        | POST   | Create new classroom          | Officer            |
-| `/api/classrooms/:id`    | PUT    | Update classroom              | Officer            |
-| `/api/classrooms/:id`    | DELETE | Delete classroom              | Officer            |
-
----
-
-### 4. AttendanceProcess Routes
-| Route                   | Method | Description                          | Role Required      |
-|--------------------------|--------|--------------------------------------|--------------------|
-| `/api/attendance`        | GET    | Get all attendance records          | Officer, Teacher   |
-| `/api/attendance/:id`    | GET    | Get attendance record by ID          | Officer, Teacher   |
-| `/api/attendance`        | POST   | Mark attendance for a classroom      | Officer            |
-| `/api/attendance/:id`    | PUT    | Update attendance status             | Officer            |
-| `/api/attendance/:id`    | DELETE | Delete attendance record             | Officer            |
-
----
-
-### 5. Report Routes
-| Route                   | Method | Description                   | Role Required      |
-|--------------------------|--------|-------------------------------|--------------------|
-| `/api/reports`           | GET    | Get all reports               | Officer, Teacher   |
-| `/api/reports/:id`       | GET    | Get report by ID              | Officer, Teacher   |
-| `/api/reports`           | POST   | Create new report             | Officer            |
-| `/api/reports/:id`       | DELETE | Delete report                 | Officer            |
-
----
-
-## ERD Diagram
-![ERD Diagram](/AttendanceProject/description_backend/ERD.png)
-
----
-
-## ⚙️ Installation Instructions (Docker)
+### 🎨 Frontend
+- **React.js** – JavaScript library for building user interfaces.
+- **React Router DOM** – Client-side routing.
+- **Fetch API** – Built-in browser API used for sending HTTP requests to the backend.
+- **CSS** – For styling the frontend using standard CSS files.
 
 ---
 
@@ -116,3 +36,121 @@ This backend serves as the core API service for the React.js frontend client.
 - SMS / Email notifications for absentees.
 - Export attendance reports to PDF/Excel.
 - Dark Mode and Theme Customization.
+
+---
+
+## 🔗 Repositories & Deployment
+
+- 🔄 **Backend Repo**: [Hudoor Backend](https://github.com/Sadeemamri2/backend)
+- 🎨 **Frontend Repo**: [Hudoor Frontend](https://github.com/Sadeemamri2/frontend)
+- 🌐 **Live App**: [Deployed Site](https://your-frontend-url.com)
+- ⚙️ **Deployed Backend**: [Deployed API](https://your-backend-url.com)
+
+---
+
+## 👥 User Roles & Permissions
+
+| Role                | Permissions |
+|---------------------|-------------|
+| **Attendance Officer** | Full access to users, classrooms, attendance, and reports |
+| **Teacher**            | Read-only access to assigned classes and students |
+| **Student**            | View personal attendance records and notifications |
+
+---
+
+## 🛣️ API Routing Overview
+
+### 1. **Users**
+| Endpoint                | Method | Description              | Access         |
+|-------------------------|--------|--------------------------|----------------|
+| `/api/users/`           | GET    | List all users           | Officer        |
+| `/api/users/:id/`       | GET    | Retrieve user by ID      | Officer, Teacher |
+| `/api/users/`           | POST   | Create new user          | Officer        |
+| `/api/users/:id/`       | PUT    | Update user info         | Officer, Self  |
+| `/api/users/:id/`       | DELETE | Delete user              | Officer        |
+
+### 2. **Roles**
+| Endpoint                | Method | Description              | Access         |
+|-------------------------|--------|--------------------------|----------------|
+| `/api/roles/`           | GET    | List all roles           | Officer        |
+| `/api/roles/:id/`       | GET    | Retrieve role            | Officer        |
+| `/api/roles/`           | POST   | Create new role          | Officer        |
+| `/api/roles/:id/`       | PUT    | Update role              | Officer        |
+| `/api/roles/:id/`       | DELETE | Delete role              | Officer        |
+
+> **Note:** Only 3 role types exist: `Officer`, `Teacher`, and `Student`.
+
+### 3. **Classrooms**
+| Endpoint                | Method | Description              | Access         |
+|-------------------------|--------|--------------------------|----------------|
+| `/api/classrooms/`      | GET    | List all classrooms      | Officer, Teacher |
+| `/api/classrooms/:id/`  | GET    | Retrieve classroom       | Officer, Teacher |
+| `/api/classrooms/`      | POST   | Create new classroom     | Officer        |
+| `/api/classrooms/:id/`  | PUT    | Update classroom         | Officer        |
+| `/api/classrooms/:id/`  | DELETE | Delete classroom         | Officer        |
+
+### 4. **Attendance**
+| Endpoint                | Method | Description              | Access         |
+|-------------------------|--------|--------------------------|----------------|
+| `/api/attendance/`      | GET    | Get all attendance       | Officer, Teacher |
+| `/api/attendance/:id/`  | GET    | Get single attendance    | Officer, Teacher |
+| `/api/attendance/`      | POST   | Mark attendance          | Officer        |
+| `/api/attendance/:id/`  | PUT    | Update attendance        | Officer        |
+| `/api/attendance/:id/`  | DELETE | Delete attendance        | Officer        |
+
+### 5. **Reports**
+| Endpoint                | Method | Description              | Access         |
+|-------------------------|--------|--------------------------|----------------|
+| `/api/reports/`         | GET    | Get all reports          | Officer, Teacher |
+| `/api/reports/:id/`     | GET    | Get report by ID         | Officer, Teacher |
+| `/api/reports/`         | POST   | Create new report        | Officer        |
+| `/api/reports/:id/`     | DELETE | Delete report            | Officer        |
+
+---
+
+## 🗂️ ERD (Entity Relationship Diagram)
+
+![ERD Diagram](./ERD.png)
+
+---
+
+## 🐳 Docker Setup Instructions
+
+1. **Install Docker**:
+   - Download and install Docker Desktop for Mac from the [official Docker website](https://www.docker.com/products/docker-desktop).
+   - Once installed, open Docker Desktop, and make sure Docker is running on your Mac.
+
+2. **Clone the Project**:
+   - Clone the repository from GitHub:
+     ```bash
+     git clone https://github.com/Sadeemamri2/backend.git
+     ```
+
+3. **Set Up the Environment**:
+   - In the project directory, build the Docker containers:
+     ```bash
+     docker-compose build
+     ```
+
+4. **Start the Containers**:
+   - To start the application using Docker:
+     ```bash
+     docker-compose up
+     ```
+
+5. **Access the Application**:
+   - Once the containers are running, access the application at:
+     - **Backend**: `http://localhost:8000`
+     - **Frontend**: `http://localhost:3000`
+
+6. **Stop the Containers**:
+   - To safely stop the containers:
+     ```bash
+     docker-compose down
+     ```
+
+
+### 1. Clone the repos:
+```bash
+git clone https://github.com/Sadeemamri2/backend
+git clone https://github.com/Sadeemamri2/frontend
