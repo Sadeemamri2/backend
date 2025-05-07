@@ -1,18 +1,17 @@
-from rest_framework import permissions, status
+from rest_framework import permissions, status, viewsets, generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from .models import CustomUser, ClassRoom, AttendanceProcess, Report  # assuming these models are in your models.py
+from rest_framework.decorators import api_view
+from .models import CustomUser, ClassRoom, AttendanceProcess, Report, Lesson
+from .serializers import LessonSerializer
 
 
 from .models import (
     CustomUser,ClassRoom,
     AttendanceProcess, Report, # Role,
-    # StudentProfile, TeacherProfile, AttendanceOfficerProfile
+  
 )
 from .serializers import (
     CustomUserSerializer, ClassRoomSerializer,
@@ -39,16 +38,6 @@ class CustomUserListCreateView(ListCreateAPIView):
 class CustomUserDetailView(RetrieveUpdateDestroyAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
-
-
-# ---------- Roles ----------
-# class RoleListCreateView(ListCreateAPIView):
-#     queryset = Role.objects.all()
-#     serializer_class = RoleSerializer
-
-# class RoleDetailView(RetrieveUpdateDestroyAPIView):
-#     queryset = Role.objects.all()
-#     serializer_class = RoleSerializer
 
 
 # ---------- Current User ----------
@@ -93,19 +82,6 @@ class StudentListView(APIView):
         return Response(serializer.data)
 
 
-# class StudentListView(APIView):
-#     permission_classes = [IsAuthenticated]
-
-#     def get(self, request):
-#         students = CustomUser.objects.filter(role='Student')
-#         serializer = CustomUserSerializer(students, many=True)
-#         return Response(serializer.data)
-
-# class StudentDetailView(RetrieveUpdateDestroyAPIView):
-#     queryset = CustomUser.objects.filter(role='Student')
-#     serializer_class = CustomUserSerializer
-#     permission_classes = [IsAuthenticated]
-
 class ClassRoomListCreateView(ListCreateAPIView):
     print("ClassRoomListCreateView")
     queryset = ClassRoom.objects.all()
@@ -135,7 +111,7 @@ class AttendanceProcessListCreateView(ListCreateAPIView):
         # Create a new attendance report
         try:
             report = Report.objects.create(
-                attendance_process=attendance_process,
+                attendance=attendance_process,
                 created_by=request.user
             )
             print("✅ Attendance Report Created:", report.id)
@@ -161,7 +137,6 @@ class BulkAttendanceView(APIView):
         date = data.get('date')
         attendances = data.get('attendances', [])
 
-        # Validate input
         if not classroom_id or not date or not attendances:
             return Response({'error': 'Missing required fields.'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -175,11 +150,10 @@ class BulkAttendanceView(APIView):
                 student = CustomUser.objects.get(id=student_id)
                 classroom = ClassRoom.objects.get(id=classroom_id)
             except CustomUser.DoesNotExist:
-                continue  # Skip if student does not exist
+                continue
             except ClassRoom.DoesNotExist:
-                continue  # Skip if classroom does not exist
+                continue
 
-            # Create the AttendanceProcess instance
             attendance_instance = AttendanceProcess(
                 student=student,
                 classroom=classroom,
@@ -189,23 +163,24 @@ class BulkAttendanceView(APIView):
             )
             attendance_instances.append(attendance_instance)
 
-        # Bulk create attendance instances
         AttendanceProcess.objects.bulk_create(attendance_instances)
 
-        # Create the Report object after creating AttendanceProcess instances
-        attendance = AttendanceProcess.objects.filter(
+        created_attendances = AttendanceProcess.objects.filter(
             classroom_id=classroom_id, date=date
-        ).first()  # Ensure we have a valid attendance instance
+        )
 
-        if attendance:  # Only create a report if attendance exists
+        if created_attendances.exists():
             report = Report.objects.create(
                 title=f"Attendance Report for {date}",
                 content=f"Attendance recorded for classroom {classroom.name} on {date}.",
                 created_by=request.user,
-                attendance=attendance  # Link the report to the attendance instance
             )
+            report.attendances.set(created_attendances)
 
-        return Response({'message': 'Attendance recorded successfully.'}, status=status.HTTP_201_CREATED)
+            return Response({"message": "Attendance has been recorded and the report was successfully created."}, status=status.HTTP_201_CREATED)
+
+        # ✅ If no attendance was created
+        return Response({"message": "Attendance has been recorded, but no report was created."}, status=status.HTTP_201_CREATED)
 
 # ---------- Reports ----------
 class ReportListCreateView(ListCreateAPIView):
@@ -221,3 +196,63 @@ class ReportDetailView(RetrieveUpdateDestroyAPIView):
     queryset = Report.objects.all()
     serializer_class = ReportSerializer
     permission_classes = [permissions.IsAdminUser]
+
+    @api_view(['PUT'])
+    def update_report(request, report_id):
+        try:
+            report = Report.objects.get(id=report_id)
+        except Report.DoesNotExist:
+            return Response({'error': 'Report not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        if request.method == 'PUT':
+            report.title = request.data.get('title', report.title)
+            report.content = request.data.get('content', report.content)
+            report.save()
+            return Response({'message': 'Report updated successfully'}, status=status.HTTP_200_OK)
+
+    @api_view(['DELETE'])
+    def delete_report(request, report_id):
+        try:
+            report = Report.objects.get(id=report_id)
+        except Report.DoesNotExist:
+            return Response({'error': 'Report not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        if request.method == 'DELETE':
+            report.delete()
+            return Response({'message': 'Report deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+
+class ReportViewSet(viewsets.ModelViewSet):
+    queryset = Report.objects.all()
+    serializer_class = ReportSerializer
+    permission_classes = [IsAuthenticated] 
+    def get_queryset(self):
+       
+        return Report.objects.filter(created_by=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+
+class ReportDetail(APIView):
+    permission_classes = [IsAuthenticated]  # أو [IsAdminUser] حسب الحاجة
+
+    def delete(self, request, pk):
+        try:
+            report = Report.objects.get(pk=pk)
+            report.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Report.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+class LessonViewSet(viewsets.ModelViewSet):
+    queryset = Lesson.objects.all()
+    serializer_class = LessonSerializer
+    permission_classes = [IsAuthenticated]
+
+class LessonListCreateView(generics.ListCreateAPIView):
+    queryset = Lesson.objects.all()
+    serializer_class = LessonSerializer
+
+class LessonDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Lesson.objects.all()
+    serializer_class = LessonSerializer

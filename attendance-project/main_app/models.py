@@ -3,7 +3,6 @@ from django.contrib.auth.models import AbstractUser
 
 
 # ---------- Role Model ----------
-# IGNORE THIS, THIS IS NOT BEING USED ANYMORE!!!!
 class Role(models.Model):
     name = models.CharField(max_length=50)  # مثل: طالب، معلم، مدير
     def __str__(self):
@@ -21,19 +20,6 @@ class CustomUser(AbstractUser):
     email = models.EmailField(blank=True, null=True)
     classroom = models.ForeignKey('ClassRoom', on_delete=models.SET_NULL, null=True, blank=True, related_name='students')
 
-
-
-class StudentProfile(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-    classroom = models.ForeignKey('ClassRoom', on_delete=models.SET_NULL, null=True, blank=True)
-
-class TeacherProfile(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-    subjects = models.CharField(max_length=255)
-
-class AttendanceOfficerProfile(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-    region = models.CharField(max_length=100)
 
 # ---------- ClassRoom Model ----------
 class ClassRoom(models.Model):
@@ -70,7 +56,18 @@ class Report(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     content = models.TextField(blank=True, null=True)
     created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    attendance = models.ForeignKey(AttendanceProcess, on_delete=models.CASCADE)
+    attendances = models.ManyToManyField(AttendanceProcess)
+
 
     def __str__(self):
         return f"{self.title} - {self.created_at.strftime('%Y-%m-%d')}"
+
+#  ---------- lesson Model ----------
+class Lesson(models.Model):
+    title = models.CharField(max_length=100)
+    description = models.TextField()
+    day = models.CharField(max_length=20)  # يمكنك تحديد الخيارات لاحقًا إذا رغبت
+
+    def __str__(self):
+        return self.title
+

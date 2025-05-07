@@ -1,6 +1,8 @@
 # main_app/serializers.py
 from rest_framework import serializers
-from .models import CustomUser, Role, ClassRoom, AttendanceProcess, Report
+from .models import CustomUser, Role, ClassRoom, AttendanceProcess, Report, Lesson
+
+
 
 
 # ---------- Role Serializer ----------
@@ -101,5 +103,24 @@ class ReportSerializer(serializers.ModelSerializer):
             'created_at',
             'content',
             'created_by', 'created_by_id',
-            'attendance', 'attendance_id'
+            'attendance', 'attendance_id',
+            'attendances'
         ]
+    attendances = serializers.SerializerMethodField()
+
+    def get_attendances(self, obj):
+        return [
+            {
+                "student_name": attendance.student.username,
+                "status": attendance.status,
+                "note": attendance.note
+            }
+            for attendance in obj.attendances.all()
+        ]
+
+
+
+class LessonSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Lesson
+        fields = ['id', 'title', 'description', 'day']
