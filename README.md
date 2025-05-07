@@ -31,11 +31,14 @@ Built with Django REST Framework on the backend and React.js on the frontend, th
 ---
 
 ## ❄️ IceBox Features
-- Add **Guardian Portal** to notify parents about attendance.
-- Admin Dashboard with advanced filters and statistics.
-- SMS / Email notifications for absentees.
-- Export attendance reports to PDF/Excel.
-- Dark Mode and Theme Customization.
+
+- **Add Guardian Portal**: Create a dedicated portal for parents to notify them about their children's attendance and provide access to reports.
+- **Update Dashboard**: Add interactive charts and advanced statistics, such as attendance and absence rates, with advanced filters for sorting data by classes or time periods.
+- **Enhance Dashboard Features**: Include real-time alerts for admins and teachers about absent or late students, and improve attendance reports to be more customizable.
+- **Integrate with Noor System**: Automatically import student data from the Noor system using an API, ensuring the database is always up-to-date.
+- **Enhance Website Security**: Implement security protocols such as HTTPS and multi-factor authentication (2FA), and encrypt sensitive data in the database.
+- **Create a Smooth Mobile App**: Develop a mobile app using React Native or Flutter to ensure compatibility across all platforms, providing a user-friendly interface suitable for all companies and educational institutions.
+
 
 ---
 
@@ -44,7 +47,7 @@ Built with Django REST Framework on the backend and React.js on the frontend, th
 - 🔄 **Backend Repo**: [Hudoor Backend](https://github.com/Sadeemamri2/backend)
 - 🎨 **Frontend Repo**: [Hudoor Frontend](https://github.com/Sadeemamri2/frontend)
 - 🌐 **Live App**: [Deployed Site](https://your-frontend-url.com)
-- ⚙️ **Deployed Backend**: [Deployed API](https://your-backend-url.com)
+
 
 ---
 
@@ -113,42 +116,6 @@ Built with Django REST Framework on the backend and React.js on the frontend, th
 ![ERD Diagram](./ERD.png)
 
 ---
-
-## 🐳 Docker Setup Instructions
-
-1. **Install Docker**:
-   - Download and install Docker Desktop for Mac from the [official Docker website](https://www.docker.com/products/docker-desktop).
-   - Once installed, open Docker Desktop, and make sure Docker is running on your Mac.
-
-2. **Clone the Project**:
-   - Clone the repository from GitHub:
-     ```bash
-     git clone https://github.com/Sadeemamri2/backend.git
-     ```
-
-3. **Set Up the Environment**:
-   - In the project directory, build the Docker containers:
-     ```bash
-     docker-compose build
-     ```
-
-4. **Start the Containers**:
-   - To start the application using Docker:
-     ```bash
-     docker-compose up
-     ```
-
-5. **Access the Application**:
-   - Once the containers are running, access the application at:
-     - **Backend**: `http://localhost:8000`
-     - **Frontend**: `http://localhost:3000`
-
-6. **Stop the Containers**:
-   - To safely stop the containers:
-     ```bash
-     docker-compose down
-     ```
-
 
 ### 1. Clone the repos:
 ```bash
